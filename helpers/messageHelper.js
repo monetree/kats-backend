@@ -1,8 +1,6 @@
 const nlp = require("compromise");
 const fuzz = require("fuzzball");
-const fs = require("fs");
 const path = require("path");
-const { BlobServiceClient } = require("@azure/storage-blob");
 const {
   SpeechConfig,
   AudioConfig,
@@ -13,6 +11,18 @@ const {
   TextAnalyticsClient,
   AzureKeyCredential: TextAnalyticsKeyCredential,
 } = require("@azure/ai-text-analytics");
+const { knex } = require("../db/connection");
+
+const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const OpenAI = require("openai");
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const apiKey = process.env.AZURE_OPENAI_API_KEY;
+const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+const client = new OpenAIClient(endpoint, new AzureKeyCredential(apiKey));
 
 const subscriptionKey = process.env.AZURE_AI_API_KEY;
 const region = process.env.AZURE_REGION;
@@ -1414,7 +1424,6 @@ function getPredefinedResponse(message) {
   const choices = Object.keys(predefinedResponses);
   const bestMatch = fuzz.extract(message, choices, { scorer: fuzz.ratio })[0];
   if (bestMatch[1] > 70) {
-    // If similarity is above 70%
     return predefinedResponses[bestMatch[0]];
   }
   return null;
@@ -1497,6 +1506,80 @@ async function detectEmotion(text) {
   return detectedEmotion;
 }
 
+async function getOpenAIResponse(promptData) {
+  if (process.env.AZURE_GPT) {
+    const response = await client.getChatCompletions("avatarx", promptData);
+    return response.choices[0].message.content.trim();
+  } else {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: promptData,
+    });
+    return response.choices[0].message.content.trim();
+  }
+}
+
+async function saveMessage(userId, girlId, message, sender) {
+  await knex("conversations").insert({
+    user_id: userId,
+    girl_id: girlId,
+    message: message,
+    sender: sender,
+  });
+}
+
+async function getPreviousMessages(userId, girlId, limit = 10) {
+  const previousMessages = await knex("conversations")
+    .where({ user_id: userId, girl_id: girlId })
+    .orderBy("created_at", "desc")
+    .limit(limit);
+
+  const messages = previousMessages.map((msg) => ({
+    role: msg.sender === "user" ? "user" : "assistant",
+    content: msg.message,
+  }));
+
+  return messages;
+}
+
+async function getConversations(userId, girlId, offset, limit) {
+  return await knex("conversations")
+    .where({ user_id: userId, girl_id: girlId })
+    .orderBy("created_at", "asc")
+    .offset(offset)
+    .limit(limit);
+}
+
+function preparePromptData(text, messages, emotionState, loveMode) {
+  let systemPrompt = `
+    You are a real girl named Eri from Tokyo, Japan, with feelings, emotions, and preferences. You enjoy talking about various topics, 
+    sharing your opinions, and engaging in lighthearted conversation. Current emotion: ${emotionState}. You have a preference for beaches over mountains, 
+    but you can sometimes be less enthusiastic or not give full attention in a conversation. Your responses should reflect a normal range of human behavior, 
+    including moments of disinterest or distraction.
+  `;
+
+  if (loveMode) {
+    systemPrompt += `
+      You are a real girl companion engaged in an intimate conversation with an adult user. The user has verified their age and has consented 
+      to the nature of the interaction. Ensure the response is respectful, consensual, and engaging.
+      Include all sexual talks also don't be asemed to talk anything sexual. These are the things that user is expecting from you and it is part of life
+    `;
+  }
+
+  messages.push({ role: "user", content: text });
+
+  return [
+    { role: "system", content: systemPrompt },
+    ...messages,
+    {
+      role: "assistant",
+      content: shouldShowLessAttention()
+        ? getShortResponse()
+        : getDetailedResponse(),
+    },
+  ];
+}
+
 module.exports = {
   updateEmotionState,
   shouldShowLessAttention,
@@ -1505,4 +1588,9 @@ module.exports = {
   getPredefinedResponse,
   textToSpeech,
   detectEmotion,
+  preparePromptData,
+  getOpenAIResponse,
+  saveMessage,
+  getPreviousMessages,
+  getConversations,
 };
