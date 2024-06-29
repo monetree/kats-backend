@@ -25,12 +25,12 @@ const migrate = async () => {
       });
   }
 
-  // Check if the "girls" table already exists
-  const girlsTableExists = await knex.schema.hasTable("girls");
+  // Check if the "avatars" table already exists
+  const avatarsTableExists = await knex.schema.hasTable("avatars");
   // If it doesn't exist, create the "users" table
-  if (!girlsTableExists) {
+  if (!avatarsTableExists) {
     await knex.schema
-      .createTable("girls", function (table) {
+      .createTable("avatars", function (table) {
         table.increments("id").primary(); // Auto-incremental primary key
         table.string("email").notNullable().unique(); // Non-nullable email field
         table.string("username").unique(); // This will show to users
@@ -52,65 +52,13 @@ const migrate = async () => {
       .createTable("conversations", function (table) {
         table.increments("id").primary(); // Auto-incremental primary key
         table.integer("user_id").unsigned().notNullable();
-        table.integer("girl_id").unsigned().notNullable();
+        table.integer("avatar_id").unsigned().notNullable();
         table.text("message").notNullable();
-        table.enu("sender", ["user", "girl"]).notNullable();
+        table.enu("sender", ["user", "avatar"]).notNullable();
         table.timestamp("created_at").defaultTo(knex.fn.now());
 
         table.foreign("user_id").references("users.id");
-        table.foreign("girl_id").references("girls.id");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  // Check if the "subscription" table already exists
-  const subscriptionTableExists = await knex.schema.hasTable("subscription");
-  // If it doesn't exist, create the "subscription" table
-  if (!subscriptionTableExists) {
-    await knex.schema
-      .createTable("subscription", function (table) {
-        table.increments("id").primary(); // Auto-incremental primary key
-        table.integer("user_id").unsigned(); // Unsigned integer column for 'user_id'
-        table.foreign("user_id").references("users.id"); // Foreign key reference to 'id' in 'users' table
-        table.timestamp("subscription_renew_date").defaultTo(knex.fn.now()); // Timestamp
-        table
-          .enu("subscription_status", ["active", "in-active"])
-          .notNullable()
-          .defaultTo("avatar-talk"); // Enum for subscription type with default value
-        table
-          .enu("subscription_type", [
-            "free", // 0
-            "avatar-talk", // $5
-            "real-girl-text-chat", // $10
-            "real-girl-audio-chat", // $50
-            "real-girl-video-chat", // $100
-            "real-girl-video-chat", // $500
-          ])
-          .notNullable()
-          .defaultTo("avatar-talk"); // Enum for subscription type with default value
-        table.timestamp("created_at").defaultTo(knex.fn.now()); // Timestamp
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  // Check if the "transactions" table already exists
-  const transactionsTableExists = await knex.schema.hasTable("transactions");
-  // If it doesn't exist, create the "transactions" table
-  if (!transactionsTableExists) {
-    await knex.schema
-      .createTable("transactions", function (table) {
-        table.increments("id").primary(); // Auto-incremental primary key
-        table.integer("user_id").unsigned(); // Unsigned integer column for 'user_id'
-        table.foreign("user_id").references("users.id"); // Foreign key reference to 'id' in 'users' table
-        table
-          .enu("transactions_type", ["subscription", "add-on", "orders"])
-          .notNullable()
-          .defaultTo("subscription"); // Enum for subscription type with default value
-        table.timestamp("created_at").defaultTo(knex.fn.now()); // Timestamp
+        table.foreign("avatar_id").references("avatars.id");
       })
       .catch((err) => {
         console.log(err);
@@ -140,8 +88,8 @@ const migrate = async () => {
           .notNullable()
           .defaultTo("free"); // Enum for order status with default value
 
-        table.integer("girl_id").unsigned(); // unsigned integer column for 'girl_id'
-        table.foreign("girl_id").references("girls.id"); // foreign key reference to 'id' in 'girls' table
+        table.integer("avatar_id").unsigned(); // unsigned integer column for 'avatar_id'
+        table.foreign("avatar_id").references("avatars.id"); // foreign key reference to 'id' in 'avatars' table
 
         table.integer("user_id").unsigned(); // unsigned integer column for 'user_id'
         table.foreign("user_id").references("users.id"); // foreign key reference to 'id' in 'users' table
@@ -258,8 +206,8 @@ const migrate = async () => {
         table.increments("id").primary(); // Auto-incremental primary key
         table.string("photo");
 
-        table.integer("girl_id").unsigned(); // unsigned integer column for 'girl_id'
-        table.foreign("girl_id").references("girls.id"); // foreign key reference to 'id' in 'girls' table
+        table.integer("avatar_id").unsigned(); // unsigned integer column for 'avatar_id'
+        table.foreign("avatar_id").references("avatars.id"); // foreign key reference to 'id' in 'avatars' table
 
         table.integer("user_id").unsigned(); // unsigned integer column for 'user_id'
         table.foreign("user_id").references("users.id"); // foreign key reference to 'id' in 'users' table

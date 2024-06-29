@@ -7,7 +7,8 @@ const cors = require("cors");
 
 const { Server } = require("socket.io");
 
-const usersRouter = require("./routes/usersRoute");
+const user = require("./routes/usersRoute");
+const conversation = require("./routes/conversationRoute");
 
 const {
   handleUserMessage,
@@ -50,10 +51,10 @@ io.on("connection", (socket) => {
   });
 });
 
-app.use("/users", usersRouter);
+app.use("/api/users", user);
+app.use("/api/conversation", conversation);
+
 app.get("/", async (req, res) => {
-  const openAIResponse = await sendMessageToOpenAI();
-  console.log(openAIResponse);
   res.send("Hello World!");
 });
 

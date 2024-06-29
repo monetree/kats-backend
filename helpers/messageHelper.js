@@ -31,13 +31,6 @@ const AZURE_STORAGE_CONNECTION_STRING =
   process.env.AZURE_STORAGE_CONNECTION_STRING;
 const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME;
 
-const textAnalyticsKey = process.env.AZURE_TEXT_ANALYTICS_KEY;
-const textAnalyticsEndpoint = process.env.AZURE_TEXT_ANALYTICS_ENDPOINT;
-const textAnalyticsClient = new TextAnalyticsClient(
-  textAnalyticsEndpoint,
-  new TextAnalyticsKeyCredential(textAnalyticsKey)
-);
-
 const girlVoiceMap = {
   Fatima: {
     voice: "ar-AE-FatimaNeural",
@@ -1522,7 +1515,7 @@ async function getOpenAIResponse(promptData) {
 async function saveMessage(userId, girlId, message, sender) {
   await knex("conversations").insert({
     user_id: userId,
-    girl_id: girlId,
+    avatar_id: girlId,
     message: message,
     sender: sender,
   });
@@ -1530,7 +1523,7 @@ async function saveMessage(userId, girlId, message, sender) {
 
 async function getPreviousMessages(userId, girlId, limit = 10) {
   const previousMessages = await knex("conversations")
-    .where({ user_id: userId, girl_id: girlId })
+    .where({ user_id: userId, avatar_id: girlId })
     .orderBy("created_at", "desc")
     .limit(limit);
 
@@ -1544,7 +1537,7 @@ async function getPreviousMessages(userId, girlId, limit = 10) {
 
 async function getConversations(userId, girlId, offset, limit) {
   return await knex("conversations")
-    .where({ user_id: userId, girl_id: girlId })
+    .where({ user_id: userId, avatar_id: girlId })
     .orderBy("created_at", "asc")
     .offset(offset)
     .limit(limit);
