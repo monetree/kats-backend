@@ -25,7 +25,14 @@ const getFeatured = async (req, res) => {
       )
       .where("is_romantic", true)
       .limit(10);
-    res.json(users);
+
+    // Format the categories as an array
+    const formattedUsers = users.map((user) => ({
+      ...user,
+      categories: JSON.parse(user.categories),
+    }));
+
+    res.json(formattedUsers);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
