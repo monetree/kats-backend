@@ -26,6 +26,8 @@ const getFeatured = async (req, res) => {
       .where("is_romantic", true)
       .limit(10);
 
+    console.log(users);
+
     // Format the categories as an array
     const formattedUsers = users.map((user) => ({
       ...user,
