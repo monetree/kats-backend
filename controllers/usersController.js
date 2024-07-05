@@ -10,6 +10,7 @@ const loginUser = async (req, res) => {
       last_name,
       provider_id,
       provider_name,
+      token,
     } = req.body;
 
     // Check if email or apple_id already exists
@@ -31,6 +32,7 @@ const loginUser = async (req, res) => {
       last_name,
       provider_id,
       provider_name,
+      token
     });
 
     const createdUser = await knex("users").where({ id: newUser }).first();
