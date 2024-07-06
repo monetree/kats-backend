@@ -42,6 +42,7 @@ const loginUser = async (req, res) => {
       last_name,
       provider_id,
       provider_name,
+      token,
       is_email_login = false,
     } = req.body;
 
@@ -80,6 +81,7 @@ const loginUser = async (req, res) => {
       last_name,
       provider_id,
       provider_name,
+      token,
       unique_id: uuidv4(),
     });
 
