@@ -12,6 +12,7 @@ const getRecommendations = async (req, res) => {
   }
 };
 
+
 const getFeatured = async (req, res) => {
   try {
     const users = await knex("avatars")
@@ -54,8 +55,22 @@ const getExplore = async (req, res) => {
   }
 };
 
+const getAvatar = async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await knex("avatars")
+      .select("id", "photo", "username", "half_body_video as video", "profession")
+      .where({ username })
+      .first();
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 module.exports = {
   getRecommendations,
   getExplore,
   getFeatured,
+  getAvatar
 };
