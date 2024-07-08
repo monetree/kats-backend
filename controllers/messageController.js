@@ -29,14 +29,14 @@ async function handleUserMessage(socket, data) {
       socket.emit("reply", { reply: predefinedResponse });
     } else {
       const promptData = preparePromptData(
+        avatarId,
         text,
         messages,
         emotionState,
         love_mode
       );
       const reply = await getOpenAIResponse(promptData);
-      console.log("Reply from OpenAI:", reply);
-      // const voice = await textToSpeech("Laila", reply);
+      // const voice = await textToSpeech(avatarId, reply);
       // const detectedEmotion = await detectEmotion(reply);
 
       await saveMessage(userId, avatarId, text, "user");
@@ -60,14 +60,25 @@ async function handleUserMessage(socket, data) {
 async function sendMessageToOpenAI() {
   try {
     const messages = [
-      { role: "system", content: "You are a helpful assistant." },
-      { role: "user", content: "Hello, how are you?" },
+      {
+        role: "system",
+        content: ` You are a real girl named Eri from Tokyo, Japan, with feelings, emotions, and preferences. You enjoy talking about various topics,  
+        sharing your opinions, and engaging in lighthearted conversation. Current emotion: neutral. You have a preference for beaches over mountains,
+         but you can sometimes be less enthusiastic or not give full attention in a conversation. Your responses should reflect a normal range of human behavior,
+          including moments of disinterest or distraction.`,
+      },
+      { role: "user", content: "Hello, how are you? all good ?" },
     ];
     const completion = await getOpenAIResponse(messages);
-    return completion;
+
+    const voice = await textToSpeech(1, completion);
+    console.log("Voice:", voice);
+
+    return "success";
   } catch (error) {
     console.error("Error interacting with OpenAI:", error);
   }
 }
 
-module.exports = { handleUserMessage, sendMessageToOpenAI };
+sendMessageToOpenAI()
+// module.exports = { handleUserMessage, sendMessageToOpenAI };
