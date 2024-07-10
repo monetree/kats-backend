@@ -195,7 +195,17 @@ async function getAudio() {
   try {
     const { message, avatarId } = request.body;
     const voice = await textToSpeech(avatarId, message);
-    return `https://kats-backend.yellowbay-b592c099.eastus.azurecontainerapps.io${voice}`
+    const url = `https://kats-backend.yellowbay-b592c099.eastus.azurecontainerapps.io${voice}`
+
+    const result = {
+      code: 200,
+      data : {
+        audio: url
+      },
+      message: "Data fetched successful",
+      status: "success"
+    }
+    res.json(result);
   } catch (error) {
     console.error("Error interacting with OpenAI:", error);
   }
