@@ -16,7 +16,6 @@ async function handleUserMessage(socket, data) {
   const emotionState = updateEmotionState(text);
 
   try {
-    console.log("User message:", text);
     const messages = await getPreviousMessages(userId, avatarId);
     // const messages = []; // Map previous messages if needed
 
@@ -52,10 +51,11 @@ async function handleUserMessage(socket, data) {
       socket.emit("reply", { reply: reply, conversations: conversations });
     }
   } catch (error) {
-    console.error(error);
     socket.emit("error", "Error generating response");
   }
 }
+
+
 
 async function sendMessageToOpenAI() {
   try {
@@ -80,5 +80,5 @@ async function sendMessageToOpenAI() {
   }
 }
 
-sendMessageToOpenAI()
-// module.exports = { handleUserMessage, sendMessageToOpenAI };
+
+module.exports = { handleUserMessage, sendMessageToOpenAI };

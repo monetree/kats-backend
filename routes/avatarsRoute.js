@@ -8,4 +8,9 @@ router.get("/featured", avatarsController.getFeatured);
 router.get("/details/:username", avatarsController.getAvatar);
 router.get("/onboarding", avatarsController.onBoarding);
 
+
+router.post("/text-to-audio", avatarsController.getAudio);
+
+
+
 module.exports = router;

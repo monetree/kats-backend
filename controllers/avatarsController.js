@@ -1,4 +1,5 @@
 const { knex } = require("../db/connection");
+const { textToSpeech } = require("../helpers/messageHelper");
 
 const onBoarding = async (req, res) => {
   try {
@@ -39,18 +40,32 @@ const onBoarding = async (req, res) => {
 };
 
 const getRecommendations = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if not specified
+  const offset = (page - 1) * limit;
+
   try {
     const users = await knex("avatars")
       .select("id", "photo", "username", "only_face_video as video", "sound")
       .orderByRaw("RAND()")
-      .limit(10);
+      .limit(limit)
+      .offset(offset);
+
+    const totalUsers = await knex("avatars").count("id as count").first();
+    const totalPages = Math.ceil(totalUsers.count / limit);
 
     const result = {
       code: 200,
-      data : users,
-      message: "Data fetched successful",
-      status: "success"
-    }
+      data: users,
+      message: "Data fetched successfully",
+      status: "success",
+      pagination: {
+        totalItems: totalUsers.count,
+        totalPages: totalPages,
+        currentPage: page,
+        pageSize: limit
+      }
+    };
 
     res.json(result);
   } catch (err) {
@@ -59,7 +74,12 @@ const getRecommendations = async (req, res) => {
 };
 
 
+
 const getFeatured = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if not specified
+  const offset = (page - 1) * limit;
+
   try {
     const users = await knex("avatars")
       .select(
@@ -72,7 +92,8 @@ const getFeatured = async (req, res) => {
         "sound"
       )
       .where("is_romantic", true)
-      .limit(10);
+      .limit(limit)
+      .offset(offset);
 
     // Format the categories as an array
     const formattedUsers = users.map((user) => ({
@@ -80,43 +101,74 @@ const getFeatured = async (req, res) => {
       categories: JSON.parse(user.categories),
     }));
 
+    const totalUsers = await knex("avatars")
+      .where("is_romantic", true)
+      .count("id as count")
+      .first();
+    const totalPages = Math.ceil(totalUsers.count / limit);
+
     const result = {
       code: 200,
-      data : formattedUsers,
-      message: "Data fetched successful",
-      status: "success"
-    }
+      data: formattedUsers,
+      message: "Data fetched successfully",
+      status: "success",
+      pagination: {
+        totalItems: totalUsers.count,
+        totalPages: totalPages,
+        currentPage: page,
+        pageSize: limit
+      }
+    };
 
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 const getExplore = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if not specified
+  const offset = (page - 1) * limit;
+
   try {
-    const users = await knex("avatars").select(
-      "id",
-      "photo",
-      "username",
-      "half_body_video as video",
-      "sound",
-      knex.raw("50000 as likes_count"),
-      knex.raw("150000 as msg_count")
-    );
+    const users = await knex("avatars")
+      .select(
+        "id",
+        "photo",
+        "username",
+        "half_body_video as video",
+        "sound",
+        knex.raw("50000 as likes_count"),
+        knex.raw("150000 as msg_count")
+      )
+      .limit(limit)
+      .offset(offset);
+
+    const totalUsers = await knex("avatars").count("id as count").first();
+    const totalPages = Math.ceil(totalUsers.count / limit);
 
     const result = {
       code: 200,
-      data : users,
-      message: "Data fetched successful",
-      status: "success"
-    }
+      data: users,
+      message: "Data fetched successfully",
+      status: "success",
+      pagination: {
+        totalItems: totalUsers.count,
+        totalPages: totalPages,
+        currentPage: page,
+        pageSize: limit
+      }
+    };
 
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
+
 
 const getAvatar = async (req, res) => {
   const { username } = req.params;
@@ -138,10 +190,24 @@ const getAvatar = async (req, res) => {
   }
 }
 
+
+async function getAudio() {
+  try {
+    const { message, avatarId } = request.body;
+    const voice = await textToSpeech(avatarId, message);
+    return `https://kats-backend.yellowbay-b592c099.eastus.azurecontainerapps.io${voice}`
+  } catch (error) {
+    console.error("Error interacting with OpenAI:", error);
+  }
+}
+
+
+
 module.exports = {
   getRecommendations,
   getExplore,
   getFeatured,
   getAvatar,
   onBoarding,
+  getAudio
 };
