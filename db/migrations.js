@@ -21,7 +21,7 @@ const migrate = async () => {
         table.string("last_name").notNullable(); // Non-nullable password field
 
         table.string("provider_id").notNullable();
-        table.string("provider_name").notNullable().unique();
+        table.string("provider_name").notNullable()
 
         table.boolean("is_active").defaultTo(true);
         table.timestamp("created_at").defaultTo(knex.fn.now());

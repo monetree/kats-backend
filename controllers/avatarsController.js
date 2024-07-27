@@ -46,7 +46,7 @@ const getRecommendations = async (req, res) => {
 
   try {
     const users = await knex("avatars")
-      .select("id", "photo", "username", "only_face_video as video", "sound")
+      .select("*")
       .orderByRaw("RAND()")
       .limit(limit)
       .offset(offset);
@@ -73,8 +73,6 @@ const getRecommendations = async (req, res) => {
   }
 };
 
-
-
 const getFeatured = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
   const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if not specified
@@ -82,16 +80,8 @@ const getFeatured = async (req, res) => {
 
   try {
     const users = await knex("avatars")
-      .select(
-        "id",
-        "photo",
-        "country",
-        "categories",
-        "username",
-        "half_body_video as video",
-        "sound"
-      )
-      .where("is_romantic", true)
+      .select("*")
+      .where("nsfw", true)
       .limit(limit)
       .offset(offset);
 
@@ -102,7 +92,7 @@ const getFeatured = async (req, res) => {
     }));
 
     const totalUsers = await knex("avatars")
-      .where("is_romantic", true)
+      .where("nsfw", true)
       .count("id as count")
       .first();
     const totalPages = Math.ceil(totalUsers.count / limit);
@@ -126,7 +116,6 @@ const getFeatured = async (req, res) => {
   }
 };
 
-
 const getExplore = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
   const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if not specified
@@ -134,15 +123,7 @@ const getExplore = async (req, res) => {
 
   try {
     const users = await knex("avatars")
-      .select(
-        "id",
-        "photo",
-        "username",
-        "half_body_video as video",
-        "sound",
-        knex.raw("50000 as likes_count"),
-        knex.raw("150000 as msg_count")
-      )
+      .select("*")
       .limit(limit)
       .offset(offset);
 
@@ -174,7 +155,7 @@ const getAvatar = async (req, res) => {
   const { username } = req.params;
   try {
     const user = await knex("avatars")
-      .select("id", "photo", "username", "half_body_video as video", "profession")
+      .select("*")
       .where({ username })
       .first();
 
