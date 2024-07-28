@@ -36,36 +36,18 @@ const loginUser = async (req, res) => {
   try {
     const {
       email,
-      apple_id,
-      username,
       first_name,
       last_name,
-      provider_id,
-      provider_name,
       token,
-      is_email_login = false,
     } = req.body;
 
     if (!email) {      
       return res.status(400).json({ error: "Email is required" });
     }
 
-    if (is_email_login) {
-      const { firstName, lastName } = extractNamesFromEmail(email);
-      await knex("users").insert({
-        email,
-        username: firstName,
-        first_name: firstName,
-        last_name: lastName,
-        unique_id: uuidv4(),
-      });
-      await sendVerificationEmail(firstName, email, newUser);
-    }
-
     // Check if email or apple_id already exists
     const existingUser = await knex("users")
       .where({ email })
-      .orWhere({ apple_id })
       .first();
 
     if (existingUser) {
@@ -75,18 +57,14 @@ const loginUser = async (req, res) => {
         message: "Login successful!",
         status: "success"
       }
-      res.status(200).json(data);
+      return res.status(200).json(data);
     }
 
     // Insert new user if email or apple_id does not exist
     const [newUser] = await knex("users").insert({
       email,
-      apple_id,
-      username,
       first_name,
       last_name,
-      provider_id,
-      provider_name,
       token,
       unique_id: uuidv4(),
     });
@@ -99,7 +77,7 @@ const loginUser = async (req, res) => {
       message: "home data get Successfully!",
       status: "success"
     }
-    res.status(200).json(data);
+    return res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

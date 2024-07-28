@@ -3,7 +3,6 @@ const {
   updateEmotionState,
   getPredefinedResponse,
   textToSpeech,
-  detectEmotion,
   getOpenAIResponse,
   saveMessage,
   getPreviousMessages,
@@ -11,14 +10,12 @@ const {
 } = require("../helpers/messageHelper");
 
 async function handleUserMessage(socket, data) {
-  const { text, userId, avatarId, love_mode, page = 1, limit = 10 } = data;
+  const { text, userId, avatarId, love_mode=false, page = 1, limit = 10 } = data;
 
   const emotionState = updateEmotionState(text);
 
   try {
     const messages = await getPreviousMessages(userId, avatarId);
-    // const messages = []; // Map previous messages if needed
-
     const predefinedResponse = getPredefinedResponse(text.toLowerCase());
 
     if (predefinedResponse) {
@@ -35,9 +32,6 @@ async function handleUserMessage(socket, data) {
         love_mode
       );
       const reply = await getOpenAIResponse(promptData);
-      // const voice = await textToSpeech(avatarId, reply);
-      // const detectedEmotion = await detectEmotion(reply);
-
       await saveMessage(userId, avatarId, text, "user");
       await saveMessage(userId, avatarId, reply, "avatar");
 
