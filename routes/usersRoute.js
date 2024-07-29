@@ -7,4 +7,7 @@ router.post("/status/id", usersController.checkStatus);
 router.patch("/update/:id", usersController.updateUser);
 router.delete("/delete/:id", usersController.deleteUser);
 
+router.post("/message", usersController.getMesages);
+
+
 module.exports = router;

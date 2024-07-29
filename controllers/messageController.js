@@ -24,7 +24,7 @@ async function handleUserMessage(socket, data) {
 
       socket.emit("reply", { reply: predefinedResponse });
     } else {
-      const promptData = preparePromptData(
+      const promptData = await preparePromptData(
         avatarId,
         text,
         messages,
@@ -42,9 +42,11 @@ async function handleUserMessage(socket, data) {
         offset,
         limit
       );
+      console.log("Conversations:", conversations);
       socket.emit("reply", { reply: reply, conversations: conversations });
     }
   } catch (error) {
+    console.log("Error handling user message:", error);
     socket.emit("error", "Error generating response");
   }
 }

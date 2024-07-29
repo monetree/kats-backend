@@ -123,9 +123,27 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getMesages = async (req, res) => {
+  try {
+    const { user_id, avatar_id } = req.body;
+    const data = await knex("conversations").where({ user_id: user_id, avatar_id: avatar_id });
+    const result = {
+      code: 200,
+      message: "Account deleted successful!",
+      status: "success",
+      data: data
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   loginUser,
   updateUser,
   deleteUser,
   checkStatus,
+  getMesages
 };
