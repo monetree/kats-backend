@@ -8,6 +8,7 @@ router.patch("/update/:id", usersController.updateUser);
 router.delete("/delete/:id", usersController.deleteUser);
 
 router.post("/message", usersController.getMesages);
+router.post("/recent-chats", usersController.getRecentChats);
 
 
 module.exports = router;

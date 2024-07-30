@@ -140,10 +140,37 @@ const getMesages = async (req, res) => {
   }
 };
 
+
+const getRecentChats = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    const data = await knex("conversations")
+      .where({ user_id: user_id })
+      .distinct('avatar_id')
+      .join('avatars', 'conversations.avatar_id', 'avatars.id')
+      .select('avatars.*');
+
+    const result = {
+      code: 200,
+      message: "Unique avatars retrieved successfully!",
+      status: "success",
+      data: data
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
 module.exports = {
   loginUser,
   updateUser,
   deleteUser,
   checkStatus,
-  getMesages
+  getMesages,
+  getRecentChats
 };
