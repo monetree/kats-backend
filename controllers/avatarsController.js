@@ -41,7 +41,7 @@ const onBoarding = async (req, res) => {
 
 const getRecommendations = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
-  const limit = parseInt(req.query.limit) || 6; // Default to 10 items per page if not specified
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if not specified
   const offset = (page - 1) * limit;
 
   try {

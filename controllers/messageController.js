@@ -10,29 +10,29 @@ const {
 } = require("../helpers/messageHelper");
 
 async function handleUserMessage(socket, data) {
-  const { text, userId, avatarId, love_mode=false, page = 1, limit = 10 } = data;
+  const { message, userId, avatarId, love_mode=false, page = 1, limit = 10 } = data;
 
-  const emotionState = updateEmotionState(text);
+  const emotionState = updateEmotionState(message);
 
   try {
     const messages = await getPreviousMessages(userId, avatarId);
-    const predefinedResponse = getPredefinedResponse(text.toLowerCase());
+    const predefinedResponse = getPredefinedResponse(message.toLowerCase());
 
     if (predefinedResponse) {
-      await saveMessage(userId, avatarId, text, "user");
+      await saveMessage(userId, avatarId, message, "user");
       await saveMessage(userId, avatarId, predefinedResponse, "avatar");
 
       socket.emit("reply", { reply: predefinedResponse });
     } else {
       const promptData = await preparePromptData(
         avatarId,
-        text,
+        message,
         messages,
         emotionState,
         love_mode
       );
       const reply = await getOpenAIResponse(promptData);
-      await saveMessage(userId, avatarId, text, "user");
+      await saveMessage(userId, avatarId, message, "user");
       await saveMessage(userId, avatarId, reply, "avatar");
 
       const offset = (page - 1) * limit;

@@ -1213,6 +1213,7 @@ function generateNgrams(words, n) {
   return ngrams;
 }
 
+
 function updateEmotionState(message) {
   const doc = nlp(message.toLowerCase());
   const words = doc.terms().out("array");
