@@ -196,7 +196,7 @@ const fetchCoins = async (req, res) => {
     const user = await knex("coins").where({ user_id: user_id }).first();
     const result = {
       code: 200,
-      message: "coins addedd",
+      message: "coins fetched",
       data: user ? {coin: user.coin } : { coin: 0 }
     }
 
