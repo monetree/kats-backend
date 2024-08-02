@@ -165,6 +165,48 @@ const getRecentChats = async (req, res) => {
 };
 
 
+const createCoins = async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const user = await knex("coins").where({ user_id: user_id }).first();
+    if(user){
+      await knex("coins").where({ user_id: user_id }).update({ coin: user.coin + 100 });
+    } else {
+      await knex("coins").insert({ user_id: user_id, coin: 100 });
+    }
+
+    const result = {
+      code: 200,
+      message: "coins addedd"
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+const fetchCoins = async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const user = await knex("coins").where({ user_id: user_id }).first();
+    const result = {
+      code: 200,
+      message: "coins addedd",
+      data: user ? {coin: user.coin } : { coin: 0 }
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 module.exports = {
   loginUser,
@@ -172,5 +214,7 @@ module.exports = {
   deleteUser,
   checkStatus,
   getMesages,
-  getRecentChats
+  getRecentChats,
+  createCoins,
+  fetchCoins
 };

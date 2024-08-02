@@ -9,6 +9,9 @@ router.delete("/delete/:id", usersController.deleteUser);
 
 router.post("/message", usersController.getMesages);
 router.post("/recent-chats", usersController.getRecentChats);
+router.get("/create-coin", usersController.createCoins);
+router.get("/get-coin", usersController.fetchCoins);
+
 
 
 module.exports = router;

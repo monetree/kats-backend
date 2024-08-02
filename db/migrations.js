@@ -31,6 +31,24 @@ const migrate = async () => {
       });
   }
 
+
+    // Check if the "coins" table already exists
+    const coinsTableExists = await knex.schema.hasTable("coins");
+    // If it doesn't exist, create the "coins" table
+    if (!coinsTableExists) {
+      await knex.schema
+        .createTable("coins", function (table) {
+          table.increments("id").primary(); // Auto-incremental primary key
+          table.integer("coin").notNullable().defaultTo(0);
+          table.integer("user_id").unsigned().notNullable();
+          table.foreign("user_id").references("users.id");
+          table.timestamp("created_at").defaultTo(knex.fn.now());
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+
   // Check if the "avatars" table already exists
   const avatarsTableExists = await knex.schema.hasTable("avatars");
   // If it doesn't exist, create the "users" table
