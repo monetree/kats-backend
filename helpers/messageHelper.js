@@ -1290,9 +1290,9 @@ async function textToSpeech(avatarId, text) {
   speechConfig.speechSynthesisVoiceName = voice;
 
   const ssml = `
-      <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${language}">
-        <voice name="${voice}">
-          <prosody pitch="${pitch}" rate="${rate}">
+      <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="ar-SA">
+        <voice name="ar-AE-FatimaNeural">
+          <prosody pitch="default" rate="default">
             <lang xml:lang="en-US">${text}</lang>
           </prosody>
         </voice>

@@ -1,52 +1,122 @@
-const { knex } = require("../db/connection");
+const {
+  getPaymentInfo,
+  decodeAndValidateToken,
+  getUserInfo,
+  createPaymentMethodUpdateSession,
+  createCheckoutSessionForSubscription,
+  cancelSubscriptionAtPeriodEnd,
+  planDetails,
+  upgradeSubscription,
+  getSubscriptionId,
+  upgradeSubscriptionIndb,
+} = require("../helpers/paymentHelper");
+const { handleErrorResponse, subscriptionPrices } = require("../utils/configs");
+const { createToken, decodeToken } = require("../utils/hash");
 
-const getOrders = async (req, res) => {
+const createCheckoutSession = async (req, res) => {
   try {
-    const orders = await knex("orders").select("*");
-    res.json(orders);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const {  subscription_type, user_id } = req.body;
+
+    const user = await getUserInfo(user_id);
+    const email = user.email;
+    
+    const url = await createCheckoutSessionForSubscription(
+      user,
+      subscription_type === "monthly" ? process.env.MONTHLY_PLAN_ID: process.env.YEARLY_PLAN_ID,
+      subscription_type,
+      email
+    );
+    return res.json({ url });
+  } catch (error) {
+    console.log(error);
+    handleErrorResponse(res, error);
   }
 };
 
-const createOrder = async (req, res) => {
+// Example usage
+
+const updatePaymentMethod = async (req, res) => {
   try {
-    const { is_completed, info, user_id } = req.body;
-    const newOrder = await knex("orders").insert({
-      is_completed,
-      info,
+    const { user_id } = req.body;
+    const payment = await getPaymentInfo(user_id);
+    const sessionUrl = await createPaymentMethodUpdateSession(
       user_id,
-    });
-    res.status(201).json(newOrder);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+      payment.customer_id
+    );
+    res.json({ url: sessionUrl });
+  } catch (error) {
+    handleErrorResponse(res, error);
   }
 };
 
-const updateOrder = async (req, res) => {
+const updateSubscription = async (req, res) => {
+  const { user_id, subscription_type } = req.body;
+
   try {
-    const { id } = req.params;
-    const updatedData = req.body;
-    const updatedOrder = await knex("orders").where({ id }).update(updatedData);
-    res.json(updatedOrder);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const subscription_id = await getSubscriptionId(user_id);
+    const status = await upgradeSubscription(
+      subscription_id,
+      subscriptionPrices[subscription_type],
+      user_id
+    );
+
+    await upgradeSubscriptionIndb(user_id, subscription_type);
+    res.send({ msg: status });
+  } catch (error) {
+    console.log(error);
+    handleErrorResponse(res, error);
   }
 };
 
-const deleteOrder = async (req, res) => {
+const cancelSubscription = async (req, res) => {
+  const { user_id } = req.body;
+
   try {
-    const { id } = req.params;
-    await knex("orders").where({ id }).del();
-    res.status(204).send();
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const payment = await getPaymentInfo(user_id);
+    await cancelSubscriptionAtPeriodEnd(payment.subscription_id);
+    res.send({ msg: "success" });
+  } catch (error) {
+    console.log(error);
+    handleErrorResponse(res, error);
+  }
+};
+
+const createVerificationToken = async (req, res) => {
+  try {
+    const token = createToken(req.body);
+    res.json({ status: "success", token });
+  } catch (error) {
+    handleErrorResponse(res, error);
+  }
+};
+
+const verifyToken = async (req, res) => {
+  try {
+    const { verificationToken } = req.body;
+    const decodedToken = decodeToken(verificationToken);
+    res.json({ status: "success", decodedToken });
+  } catch (error) {
+    handleErrorResponse(res, error);
+  }
+};
+
+const getPlanDetails = async (req, res) => {
+  const { user_id } = req.body;
+  try {
+    const plan = await planDetails(user_id);
+
+    res.json(plan);
+  } catch (error) {
+    handleErrorResponse(res, error);
   }
 };
 
 module.exports = {
-  getOrders,
-  createOrder,
-  updateOrder,
-  deleteOrder,
+  createCheckoutSession,
+  cancelSubscription,
+  updatePaymentMethod,
+  createVerificationToken,
+  verifyToken,
+  getPlanDetails,
+  updateSubscription,
 };

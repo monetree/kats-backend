@@ -53,7 +53,8 @@ async function handleUserMessage(socket, data) {
 
 
 
-async function sendMessageToOpenAI() {
+
+const sendMessageToOpenAI = async (req, res) => {
   try {
     const messages = [
       {
@@ -68,11 +69,9 @@ async function sendMessageToOpenAI() {
     const completion = await getOpenAIResponse(messages);
 
     const voice = await textToSpeech(1, completion);
-    console.log("Voice:", voice);
-
-    return "success";
+    return res.json({ voice });
   } catch (error) {
-    console.error("Error interacting with OpenAI:", error);
+    res.status(500).json({ error: err.message });
   }
 }
 

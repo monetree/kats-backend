@@ -1,6 +1,7 @@
 const { knex } = require("../db/connection");
 const { v4: uuidv4 } = require("uuid");
 const { sendVerificationEmail } = require("../utils/email");
+const { generateImage } = require("../helpers/videoProcessingHelper");
 
 const checkStatus = async (req, res) => {
   try {
@@ -207,6 +208,23 @@ const fetchCoins = async (req, res) => {
 };
 
 
+const generateImg = async (req, res) => {
+  try {
+
+    const data = await generateImage()
+    const result = {
+      code: 200,
+      message: "coins fetched",
+      data: data
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 module.exports = {
   loginUser,
@@ -216,5 +234,6 @@ module.exports = {
   getMesages,
   getRecentChats,
   createCoins,
-  fetchCoins
+  fetchCoins,
+  generateImg
 };
