@@ -26,7 +26,7 @@ const io = new Server(server, {
 app.use(cors());
 
 // Serve static files from /tmp directory
-app.use('/tmp', express.static(path.join(__dirname, 'tmp')));
+app.use('/tmp', express.static('/tmp'));
 
 // Webhook APIs (keeping at the top to receive raw req.body)
 app.use("/api/webhook", express.raw({ type: "application/json" }), webhook);
