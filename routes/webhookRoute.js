@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const stripeWebhookController = require("../controllers/stripeWebhookController");
-const typeformWebhookController = require("../controllers/typeformWebhookController");
 
 // Stripe webhook for checkout session completion
 // Payload: Stripe event data for 'checkout.session.completed'
