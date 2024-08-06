@@ -69,7 +69,7 @@ const sendMessageToOpenAI = async (req, res) => {
     const completion = await getOpenAIResponse(messages);
 
     const voice = await textToSpeech(1, completion);
-    return res.json({ voice });
+    return res.json({ voice: `https://body.avatarx.live${voice}` });
   } catch (error) {
     res.status(500).json({ error: err.message });
   }
