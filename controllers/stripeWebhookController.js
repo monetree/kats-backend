@@ -14,7 +14,7 @@ const {
   insertTransactionHistory,
   getUserBySubscriptionId,
 } = require("../helpers/paymentHelper");
-const { sendTemplateEmail } = require("../utils/ses/aws_email");
+// const { sendTemplateEmail } = require("../utils/ses/aws_email");
 
 
 const checkoutSessionCompleted = async (req, res) => {
@@ -99,12 +99,12 @@ const customerSubscriptionUpdated = async (req, res) => {
     const user = await getUserInfo(user_id);
     const payment = await getPaymentInfo(user_id);
 
-    if(payment.subscription_type !== "beginner") {
-      await sendTemplateEmail("planUpgradeTemplate", user.email, {
-        name: user.full_name,
-        plan: `${payment.subscription_type} Saver`
-      });
-    }
+    // if(payment.subscription_type !== "beginner") {
+    //   await sendTemplateEmail("planUpgradeTemplate", user.email, {
+    //     name: user.full_name,
+    //     plan: `${payment.subscription_type} Saver`
+    //   });
+    // }
 
     await insertTransactionHistory(
       user_id,
