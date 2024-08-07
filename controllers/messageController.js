@@ -10,7 +10,7 @@ const {
 } = require("../helpers/messageHelper");
 
 async function handleUserMessage(socket, data) {
-  const { message, userId, avatarId, love_mode=false, page = 1, limit = 10 } = data;
+  const { message, userId, avatarId, love_mode=false, is_voice=false, page = 1, limit = 10 } = data;
 
   const emotionState = updateEmotionState(message);
 
@@ -42,8 +42,12 @@ async function handleUserMessage(socket, data) {
         offset,
         limit
       );
-      console.log("Conversations:", conversations);
-      socket.emit("reply", { reply: reply, conversations: conversations });
+      let voice = null;
+      if(is_voice){
+        voice = await textToSpeech(1, completion);
+      }
+      
+      socket.emit("reply", { reply: reply, voice: voice, conversations: conversations });
     }
   } catch (error) {
     console.log("Error handling user message:", error);
